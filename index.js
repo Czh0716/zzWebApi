@@ -24,7 +24,34 @@ const UserSchema = new Schema({
     }
 })
 
+const ProjectSchema = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    config: {
+        type: String
+    },
+    createUser:{
+        type: String,
+        required: true
+    },
+    createAt: {
+        type: Date,
+        default: Date.now
+    },
+    modifyAt:{
+        type: Date
+    }
+
+})
+
 const User = mongoose.model('User',UserSchema)
+const Project = mongoose.model('Project',ProjectSchema)
 
 app.use(urlencodedParser)
 app.use(jsonParser)
@@ -55,6 +82,37 @@ app.post('/login',(req,res) => {
         res.send(respData)
     })
 })
+
+app.post('/addProject',(req,res) => {
+    const d = new Project(req.body)
+    d.save((err) => {
+        if(err) return res.status(400).send('格式错误')
+
+        res.send('添加成功!')
+    })
+})
+
+
+app.get('/getProjects',(req,res) => {
+    const {uid} = req.query
+
+    Project.find({createUser: uid},{config:0},(err,rest) => {
+        if(err) return res.status(400).end()
+
+        res.json(rest)
+    })
+    
+})
+
+app.post('/deleteProject',(req,res) => {
+    const {id} = req.body
+    Project.findOneAndDelete({id},(err,rest) => {
+        if(err) return res.status(400).end()
+
+        res.send('删除成功！')
+    })
+})
+
 
 
 app.listen(3000,() => {
