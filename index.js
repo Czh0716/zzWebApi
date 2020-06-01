@@ -106,7 +106,7 @@ app.get('/getProjects',(req,res) => {
 
 app.post('/deleteProject',(req,res) => {
     const {id} = req.body
-    Project.findOneAndDelete({id},(err,rest) => {
+    Project.findOneAndDelete({_id: id},(err,rest) => {
         if(err) return res.status(400).end()
 
         res.send('删除成功！')
