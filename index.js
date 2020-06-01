@@ -34,7 +34,8 @@ const ProjectSchema = new Schema({
         required: true
     },
     config: {
-        type: String
+        type: String,
+        default: ''
     },
     createUser:{
         type: String,
@@ -104,6 +105,18 @@ app.get('/getProjects',(req,res) => {
     
 })
 
+app.get('/getProject',(req,res) => {
+    const {id} = req.query
+
+    Project.findOne({_id: id},(err,rest) => {
+        if(err) return res.status(400).end()
+        console.log(rest);
+
+        res.json(rest)
+    })
+    
+})
+
 app.post('/deleteProject',(req,res) => {
     const {id} = req.body
     Project.findOneAndDelete({_id: id},(err,rest) => {
@@ -113,6 +126,14 @@ app.post('/deleteProject',(req,res) => {
     })
 })
 
+
+app.post('/updateProject',(req,res) => {
+    Project.findOneAndUpdate( {_id:req.body._id},req.body,(err,rest) => {
+        if(err) return res.status(400).end()
+
+        res.send('更新成功！')
+    })
+})
 
 
 app.listen(3000,() => {
