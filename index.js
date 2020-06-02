@@ -51,8 +51,24 @@ const ProjectSchema = new Schema({
 
 })
 
+const OperationRecordSchema = new Schema({
+    status: {
+        type: Number,
+        required: true
+    },
+    message: {
+        type: String,
+        required: true
+    },
+    createAt: {
+        type: Date,
+        default: Date.now
+    }
+})
+
 const User = mongoose.model('User',UserSchema)
 const Project = mongoose.model('Project',ProjectSchema)
+const OperationRecord = mongoose.model('OperationRecord',OperationRecordSchema)
 
 app.use(urlencodedParser)
 app.use(jsonParser)
@@ -88,6 +104,8 @@ app.post('/addProject',(req,res) => {
     const d = new Project(req.body)
     d.save((err) => {
         if(err) return res.status(400).send('格式错误')
+        const record = new OperationRecord({status: 0,message:`新建项目${req.body.name}`})
+        record.save()
 
         res.send('添加成功!')
     })
@@ -110,8 +128,6 @@ app.get('/getProject',(req,res) => {
 
     Project.findOne({_id: id},(err,rest) => {
         if(err) return res.status(400).end()
-        console.log(rest);
-
         res.json(rest)
     })
     
@@ -122,6 +138,8 @@ app.post('/deleteProject',(req,res) => {
     Project.findOneAndDelete({_id: id},(err,rest) => {
         if(err) return res.status(400).end()
 
+        const record = new OperationRecord({status: 2,message:`删除项目${rest.name}`})
+        record.save()
         res.send('删除成功！')
     })
 })
@@ -131,7 +149,17 @@ app.post('/updateProject',(req,res) => {
     Project.findOneAndUpdate( {_id:req.body._id},req.body,(err,rest) => {
         if(err) return res.status(400).end()
 
+        const record = new OperationRecord({status: 1,message:`编辑项目${req.body.name}`})
+        record.save()
+
         res.send('更新成功！')
+    })
+})
+
+app.get('/getOperationRecord',(req,res) => {
+    OperationRecord.find((err,rest) => {
+        if(err) return res.status(400).end()
+        res.json(rest)
     })
 })
 
